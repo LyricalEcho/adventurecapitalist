@@ -40,11 +40,6 @@ adventure-capitalist-cli/
    source venv/bin/activate   # on Linux/macOS
    venv\Scripts\activate    # on Windows
    ```
-4. Install requirements (none external):
-
-   ```bash
-   pip install -r requirements.txt
-   ```
 
 ## Usage
 
@@ -67,4 +62,4 @@ Pull requests welcome! Please follow PEP8 styling and include tests where approp
 
 ## License
 
-MIT © Your Name
+MIT © LyricalEcho
