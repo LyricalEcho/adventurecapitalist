@@ -54,7 +54,7 @@ def main():
                     amt = biz.collect()
                     collected += amt
                     cash += amt
-            print(f"Collected ${format_amount(collected)} manually.") if collected else print("Nothing to collect.")
+            print(f"Collected ${collected} manually.") if collected else print("Nothing to collect.")
 
         elif choice == '3':
             try:
