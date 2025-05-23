@@ -1,5 +1,5 @@
 """
-Terminal display and UI helpers.
+Terminal UI: display formatting and helpers.
 """
 import os
 import platform
@@ -8,14 +8,11 @@ from business import Business
 
 
 def clear_screen():
-    command = 'cls' if platform.system() == 'Windows' else 'clear'
-    os.system(command)
+    os.system('cls' if platform.system() == 'Windows' else 'clear')
 
 
 def format_amount(n: float) -> str:
-    """
-    Abbreviate large numbers: k, mil, bil, etc.
-    """
+    """Abbreviate numbers: k, mil, bil."""
     if n >= 1e9:
         return f"{n/1e9:.2f}bil"
     if n >= 1e6:
@@ -27,22 +24,14 @@ def format_amount(n: float) -> str:
 
 def display_status(cash: float, businesses: List[Business]):
     clear_screen()
-    total_rps = sum(b.profit_per_sec() for b in businesses)
-    print(f"Cash: ${format_amount(cash):<10}    Total RPS: ${format_amount(total_rps)}\n")
-    print("Businesses (cycle progress):")
-    bar_len = 10
-    for idx, biz in enumerate(businesses, start=1):
+    total = sum(b.profit_per_sec() for b in businesses)
+    print(f"Cash: ${format_amount(cash):<10}   Total Revenue Per Cycle: ${format_amount(total)}\n")
+    print("Businesses (progress):")
+    for idx, biz in enumerate(businesses, 1):
         prog = biz.progress()
-        fill = int(prog * bar_len)
-        bar = '[' + '#' * fill + '-' * (bar_len - fill) + ']'
+        bar = '[' + '#' * int(prog*10) + '-' * (10-int(prog*10)) + ']'  # 10-char
         mgr = ' [M]' if biz.manager else ''
-        cost_str = format_amount(biz.cost())
-        rps_str = format_amount(biz.profit_per_sec())
-        print(
-            f"{idx}. {biz.name:<20}{mgr:<4}"
-            f"Owned:{biz.count:<4}"
-            f"Cost:${cost_str:<8}"  
-            f"RPS:${rps_str:<8}"  
-            f"{bar} {int(prog*100):>3}%"
-        )
+        print(f"{idx}. {biz.name:<18}{mgr:<4} Owned:{biz.count:<4}"
+              f" Cost:${format_amount(biz.cost()):<8}"
+              f" R/C:${format_amount(biz.profit_per_sec()):<8} {bar} {int(prog*100):>3}%")
     print()

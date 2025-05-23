@@ -1,5 +1,5 @@
 """
-Main entrypoint: orchestrates game loop and user input.
+Main loop and user interactions.
 """
 import time
 from business import Business
@@ -15,67 +15,69 @@ def main():
         Business("Pizza Delivery", 8640, 4320, interval=1000),
         Business("Donut Shop", 103680, 51840, interval=10000),
     ]
+
     cash = load_game(businesses)
-    if cash == 0 and businesses[0].count == 0:
+    if not cash and not businesses[0].count:
         businesses[0].count = 1
     for biz in businesses:
         biz.last_time = time.time()
 
-    actions = {'1': 'Buy', '2': 'Collect', '3': 'Hire Manager', '4': 'Save & Exit'}
+    actions = {'1': 'Buy Business', '2': 'Collect', '3': 'Hire Manager', '4': 'Save & Exit'}
 
     while True:
+        # auto-collect for managers
         for biz in businesses:
             if biz.manager and biz.ready():
                 cash += biz.collect()
+
         display_status(cash, businesses)
-        print("Actions:")
-        for k, v in actions.items(): print(f" {k}) {v}")
-        choice = input("Select: ")
+        for key, act in actions.items(): print(f"{key}) {act}")
+        choice = input("> ")
 
         if choice == '1':
-            try:
-                idx = int(input("Business #: ")) - 1
+            idx = int(input("Business #: ")) - 1
+            if 0 <= idx < len(businesses):
                 biz = businesses[idx]
-                price = biz.cost()
-                if cash >= price:
-                    cash -= price
+                cost = biz.cost()
+                if cash >= cost:
+                    cash -= cost
                     biz.count += 1
                     biz.check_milestone()
-                    print(f"Purchased 1 {biz.name}! Total: {biz.count}")
+                    print(f"Bought 1 {biz.name}, now {biz.count}.")
                 else:
-                    print("Insufficient funds.")
-            except (IndexError, ValueError):
-                print("Invalid selection.")
+                    print("Not enough cash.")
+            else:
+                print("Invalid business #.")
 
         elif choice == '2':
-            collected = 0.0
+            total_col = 0
             for biz in businesses:
                 if not biz.manager:
                     amt = biz.collect()
-                    collected += amt
+                    total_col += amt
                     cash += amt
-            print(f"Collected ${collected} manually.") if collected else print("Nothing to collect.")
+            print(f"Collected ${total_col}.") if total_col else print("Nothing ready.")
 
         elif choice == '3':
-            try:
-                idx = int(input("Business #: ")) - 1
+            idx = int(input("Business #: ")) - 1
+            if 0 <= idx < len(businesses):
                 biz = businesses[idx]
-                if biz.manager:
-                    print("Manager already hired.")
-                else:
-                    cost = biz.manager_cost()
-                    if cash >= cost:
-                        cash -= cost
+                if not biz.manager:
+                    m_cost = biz.manager_cost()
+                    if cash >= m_cost:
+                        cash -= m_cost
                         biz.manager = True
-                        print(f"Manager hired for {biz.name}.")
+                        print(f"Manager for {biz.name} hired.")
                     else:
-                        print("Insufficient funds for manager.")
-            except (IndexError, ValueError):
-                print("Invalid selection.")
+                        print("Insufficient funds.")
+                else:
+                    print("Already has manager.")
+            else:
+                print("Invalid business #.")
 
         elif choice == '4':
             save_game(cash, businesses)
-            print("Game saved. Goodbye!")
+            print("Game saved.")
             break
 
         else:
